@@ -14,15 +14,14 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = D(children=[
     html.H1(children='Memes-4-Africa'),
-    D(D(D(D(children= ['Google', I(src=IMG_SRC_1, width='100%')],
+    D(children=[D(D(D(children= ['Google', I(src=IMG_SRC_1, width='100%')],
             className='card-header'),
           className='bs-component'),
         className='col-lg-6'),
-      className='row'),
-    D(D(D(D(children= ['Reddit', I(src=IMG_SRC_2, width='100%')],
+        D(D(D(children= ['Reddit', I(src=IMG_SRC_2, width='100%')],
             className='card-header'),
           className='bs-component'),
-        className='col-lg-6'),
+        className='col-lg-6')],
       className='row')
 
 ])
