@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+**/meme_venv
+
+*.pck
+
 # C extensions
 *.so
 
