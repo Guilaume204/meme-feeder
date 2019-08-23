@@ -24,12 +24,24 @@ input = dbc.Container([
         [
             dbc.Col(
                 [dcc.Input(id='userInput',
-                           placeholder='Enter a value...',
+                           placeholder='r/',
                            type='text',
                            value=''
                            ), dbc.Button('Submit', id="btnSubmit", color="dark", className="mr-1")
                  ]
+            ),
+
+            dcc.RadioItems(
+                options=[
+                    {'label': 'Hot', 'value': 'Hot'},
+                    {'label': 'New', 'value': 'New'}
+
+                ],
+                value='',
+                labelStyle={'display': 'inline-block'}
             )
+
+
         ]
     )
 
