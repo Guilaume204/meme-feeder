@@ -6,7 +6,7 @@ import dash_bootstrap_components as dbc
 import pickle as pck
 import praw
 
-username, password, app_client_id, app_client_secret = 'Grade1503', 'Raffels1503', 'jljZhDDYjJNGEA', 'jmX3k3a38suV2HBDCwBsBRBNmv0'
+username, password, app_client_id, app_client_secret = '', '', '', ''
 reddit = praw.Reddit(client_id=app_client_id,
                      client_secret=app_client_secret,
                      user_agent=username,
@@ -32,9 +32,10 @@ input = dbc.Container([
             ),
 
             dcc.RadioItems(
+                id='radioInput',
                 options=[
-                    {'label': 'Hot', 'value': 'Hot'},
-                    {'label': 'New', 'value': 'New'}
+                    {'label': 'hot', 'value': 'hot'},
+                    {'label': 'new', 'value': 'new'}
 
                 ],
                 value='',
@@ -69,8 +70,9 @@ app.config.suppress_callback_exceptions = True
 @app.callback(
     dash.dependencies.Output('output', 'children'),
     [dash.dependencies.Input('btnSubmit', 'n_clicks')],
-    [dash.dependencies.State('userInput', 'value')])
-def update_output(n_clicks, value):
+    [dash.dependencies.State('userInput', 'value'),
+     dash.dependencies.State('radioInput', 'value')])
+def update_output(n_clicks, value, value):
     if value is '':
         return "Please insert"
     else:
@@ -97,4 +99,4 @@ def update_output(n_clicks, value):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True, port=9989)
+    app.run_server(debug=True, port=9889)
