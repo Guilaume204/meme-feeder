@@ -5,8 +5,17 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 import pickle as pck
 import praw
+import configparser
 
-username, password, app_client_id, app_client_secret = '', '', '', ''
+
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+username = config['User']['username']
+password = config['User']['password']
+app_client_id = config['Keys']['client_id']
+app_client_secret = config['Keys']['client_secret']
+
 reddit = praw.Reddit(client_id=app_client_id,
                      client_secret=app_client_secret,
                      user_agent=username,
@@ -23,22 +32,23 @@ input = dbc.Container([
     dbc.Row(
         [
             dbc.Col(
-                [dcc.Input(id='userInput',
-                           placeholder='r/',
-                           type='text',
-                           value=''
-                           ), dbc.Button('Submit', id="btnSubmit", color="dark", className="mr-1")
-                 ]
+                [
+                    dbc.InputGroup(
+                        [
+                            dbc.InputGroupAddon("r/", addon_type="prepend"),
+                            dbc.Input(id='userInput', value="dankmemes"),
+                        ]
+                    ),
+                    dbc.Button('Submit', id="btnSubmit", color="dark", className="mr-1")
+                ]
             ),
 
-            dcc.RadioItems(
+            dbc.RadioItems(
                 id='radioInput',
                 options=[
-                    {'label': 'hot', 'value': 'hot'},
-                    {'label': 'new', 'value': 'new'}
-
-                ],
-                value='',
+                    {'label': 'Hot', 'value': 'hot'},
+                    {'label': 'New', 'value': 'new'}],
+                value='hot',
                 labelStyle={'display': 'inline-block'}
             )
 
@@ -69,15 +79,18 @@ app.config.suppress_callback_exceptions = True
 
 @app.callback(
     dash.dependencies.Output('output', 'children'),
-    [dash.dependencies.Input('btnSubmit', 'n_clicks')],
+    [dash.dependencies.Input('btnSubmit', 'n_clicks'),
+     dash.dependencies.Input('userInput', 'n_submit')],
     [dash.dependencies.State('userInput', 'value'),
      dash.dependencies.State('radioInput', 'value')])
-def update_output(n_clicks, value, value):
-    if value is '':
-        return "Please insert"
-    else:
-        subreddit = reddit.subreddit(value)
-        posts = subreddit.new(limit=10)
+def update_output(n_clicks_submit, n_enters, text, choice):
+    print(n_clicks_submit, n_enters, text, choice)
+    if (n_clicks_submit is not None) or (n_enters is not None):
+        subreddit = reddit.subreddit(text)
+        if choice == 'new':
+            posts = subreddit.new(limit=10)
+        else:
+            posts = subreddit.hot(limit=10)
         cards = []
         for post in posts:
             url = post.url
@@ -96,7 +109,9 @@ def update_output(n_clicks, value, value):
                 ]
             ))
         return cards
+    else:
+        return ''
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True, port=9889)
+    app.run_server(debug=True)
