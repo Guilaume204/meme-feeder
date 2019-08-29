@@ -2,31 +2,116 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_bootstrap_components as dbc
+import pickle as pck
+import praw
+import configparser
 
-from dash_html_components import Div as D, Img as I
 
-IMG_SRC_1 = 'https://www.todaysparent.com/wp-content/uploads/2017/06/when-your-kid-becomes-a-meme-1024x576-1497986561.jpg'
-IMG_SRC_2 = 'https://i.kym-cdn.com/entries/icons/mobile/000/016/958/Dankkkk.jpg'
-IMG_SRC_3 ='https://www.petmd.com/sites/default/files/what-does-it-mean-when-cat-wags-tail.jpg'
-IMG_SRC_4 = 'https://cdn-prod.medicalnewstoday.com/content/images/articles/322/322868/golden-retriever-puppy.jpg'
+config = configparser.ConfigParser()
+config.read('config.ini')
 
-external_stylesheets = ['https://bootswatch.com/4/darkly/bootstrap.min.css']
+username = config['User']['username']
+password = config['User']['password']
+app_client_id = config['Keys']['client_id']
+app_client_secret = config['Keys']['client_secret']
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+reddit = praw.Reddit(client_id=app_client_id,
+                     client_secret=app_client_secret,
+                     user_agent=username,
+                     username=username,
+                     password=password)
 
-app.layout = D(children=[
-    html.H1(children='Memes-4-Africa'),
-    D(children=[D(D(D(children= ['Google', I(src=IMG_SRC_1, width='100%'), I(src=IMG_SRC_3, width='100%')],
-            className='card-header'),
-          className='bs-component'),
-        className='col-lg-6'),
-        D(D(D(children= ['Reddit', I(src=IMG_SRC_2, width='100%'), I(src=IMG_SRC_4, width='100%')],
-            className='card-header'),
-          className='bs-component'),
-        className='col-lg-6')],
-      className='row')
+navbar = dbc.NavbarSimple(
+    brand="Meme Feeder",
+    brand_href="#",
+    sticky="top",
+)
 
-])
+input = dbc.Container([
+    dbc.Row(
+        [
+            dbc.Col(
+                [
+                    dbc.InputGroup(
+                        [
+                            dbc.InputGroupAddon("r/", addon_type="prepend"),
+                            dbc.Input(id='userInput', value="dankmemes"),
+                        ]
+                    ),
+                    dbc.Button('Submit', id="btnSubmit", color="dark", className="mr-1")
+                ]
+            ),
 
-if __name__ == '__main__':
-    app.run_server(debug=True, port=12343)
+            dbc.RadioItems(
+                id='radioInput',
+                options=[
+                    {'label': 'Hot', 'value': 'hot'},
+                    {'label': 'New', 'value': 'new'}],
+                value='hot',
+                labelStyle={'display': 'inline-block'}
+            )
+
+
+        ]
+    )
+
+]
+)
+
+body = dbc.Container(
+    [
+        dbc.Row(
+            [
+                html.Div(id='output')
+            ]
+        )
+    ],
+    className="mt-4",
+)
+
+
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+
+app.layout = html.Div([navbar, input, body])
+app.config.suppress_callback_exceptions = True
+
+
+@app.callback(
+    dash.dependencies.Output('output', 'children'),
+    [dash.dependencies.Input('btnSubmit', 'n_clicks'),
+     dash.dependencies.Input('userInput', 'n_submit')],
+    [dash.dependencies.State('userInput', 'value'),
+     dash.dependencies.State('radioInput', 'value')])
+def update_output(n_clicks_submit, n_enters, text, choice):
+    print(n_clicks_submit, n_enters, text, choice)
+    if (n_clicks_submit is not None) or (n_enters is not None):
+        subreddit = reddit.subreddit(text)
+        if choice == 'new':
+            posts = subreddit.new(limit=10)
+        else:
+            posts = subreddit.hot(limit=10)
+        cards = []
+        for post in posts:
+            url = post.url
+            cards.append(dbc.Card(
+                [dbc.CardBody(
+                    [
+                        html.H4("Card title",
+                                className="card-title"),
+                        html.P(
+                            url
+                        )
+                    ]
+                ),
+                    dbc.CardImg(src=url, top=True)
+
+                ]
+            ))
+        return cards
+    else:
+        return ''
+
+
+if __name__ == "__main__":
+    app.run_server(debug=True)
