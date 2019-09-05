@@ -50,6 +50,16 @@ input = dbc.Container([
                     {'label': 'New', 'value': 'new'}],
                 value='hot',
                 labelStyle={'display': 'inline-block'}
+            ),
+
+            dcc.Dropdown(
+                id='dropdown',
+                options=[
+                    {'label': '10', 'value': '10'},
+                    {'label': '100', 'value': '100'},
+                    {'label': '1000', 'value': '1000'}
+                ],
+                value='amount'
             )
 
 
@@ -82,15 +92,16 @@ app.config.suppress_callback_exceptions = True
     [dash.dependencies.Input('btnSubmit', 'n_clicks'),
      dash.dependencies.Input('userInput', 'n_submit')],
     [dash.dependencies.State('userInput', 'value'),
-     dash.dependencies.State('radioInput', 'value')])
-def update_output(n_clicks_submit, n_enters, text, choice):
-    print(n_clicks_submit, n_enters, text, choice)
+     dash.dependencies.State('radioInput', 'value'),
+     dash.dependencies.State('dropdown', 'value')])
+def update_output(n_clicks_submit, n_enters, text, choice, amount):
+    print(n_clicks_submit, n_enters, text, choice, amount)
     if (n_clicks_submit is not None) or (n_enters is not None):
         subreddit = reddit.subreddit(text)
         if choice == 'new':
-            posts = subreddit.new(limit=10)
+            posts = subreddit.new(limit=int(amount))
         else:
-            posts = subreddit.hot(limit=10)
+            posts = subreddit.hot(limit=int(amount))
         cards = []
         for post in posts:
             url = post.url
