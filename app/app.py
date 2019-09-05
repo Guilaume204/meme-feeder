@@ -39,7 +39,7 @@ input = dbc.Container([
                             dbc.Input(id='userInput', value="dankmemes"),
                         ]
                     ),
-                    dbc.Button('Submit', id="btnSubmit", color="dark", className="mr-1")
+                    dbc.Button('Submit Query', id="btnSubmit", color="dark", className="mr-1")
                 ]
             ),
 
@@ -94,24 +94,25 @@ def update_output(n_clicks_submit, n_enters, text, choice):
         cards = []
         for post in posts:
             url = post.url
-            cards.append(dbc.Card(
-                [dbc.CardBody(
-                    [
-                        html.H4("Card title",
-                                className="card-title"),
-                        html.P(
-                            url
-                        )
-                    ]
-                ),
-                    dbc.CardImg(src=url, top=True)
+            if 'jpg' in url:
+                cards.append(dbc.Card(
+                    [dbc.CardBody(
+                        [
+                            html.H4("Card title",
+                                    className="card-title"),
+                            html.P(
+                                url
+                            )
+                        ]
+                    ),
+                        dbc.CardImg(src=url, top=True)
 
-                ]
-            ))
+                    ]
+                ))
         return cards
     else:
         return ''
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=True, port=9999)
