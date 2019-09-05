@@ -3,6 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+app/config.ini
+
+**/meme_venv
+
+*.pck
+
 # C extensions
 *.so
 
